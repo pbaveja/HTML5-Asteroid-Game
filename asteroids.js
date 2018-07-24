@@ -1,21 +1,6 @@
-// function Triangle() {
-//   var canvas = document.getElementById('canvas');
-//   var context = canvas.getContext('2d');
-//   canvas.width = 600;
-//   canvas.height = 480;
-  
-//   context.beginPath();
-//   context.moveTo(canvas.width/2, canvas.height/2);
-  
-//   context.lineTo(canvas.width/2+10,canvas.height/2+30);
-//   context.lineTo(canvas.width/2-10, canvas.height/2+30);
-//   context.lineTo(canvas.width/2, canvas.height/2);
-//   context.stroke();
-// }
-// window.onload = Triangle;
-
 var Asteroids = function(theGame) {
     this.thecanvas = Asteroids.thecanvas(this, theGame);
+    this.player = Asteroids.player(this);
     return this;
 }
 
@@ -27,6 +12,19 @@ Asteroids.thecanvas = function(game, theGame) {
     return canvas;
 }
 
+Asteroids.player = function(game) {
+    var pos = [GAME_WIDTH/2,GAME_HEIGHT/2];
+    var context = game.thecanvas.getContext('2d');
+    context.beginPath();
+
+    context.moveTo(pos[0], pos[1]);
+    context.lineTo(pos[0]+10,pos[1]+30);
+    context.lineTo(pos[0]-10, canvas.height/2+30);
+    context.lineTo(pos[0], pos[1]);
+    context.stroke();
+}
+
 GAME_WIDTH = 600;
 GAME_HEIGHT = 480;
+
 window.onload = Asteroids(document.getElementById('theGame'));
