@@ -8,7 +8,7 @@ Asteroids.thecanvas = function(game, theGame) {
     var canvas = document.getElementById('canvas');
     canvas.width = GAME_WIDTH;
     canvas.height = GAME_HEIGHT;
-    theGame.appendChild(canvas);
+    //theGame.appendChild(canvas);
     return canvas;
 }
 
@@ -17,11 +17,8 @@ Asteroids.player = function(game) {
     var direction = -Math.PI/2;
     var context = game.thecanvas.getContext('2d');
     
-    context.setTransform(Math.cos(direction), 
-                            Math.sin(direction), 
-                            -Math.sin(direction), 
-                                Math.cos(direction),
-                                    pos[0], pos[1]);
+    context.translate(pos[0], pos[1]);
+    context.rotate(direction);
 
     context.beginPath();
 
