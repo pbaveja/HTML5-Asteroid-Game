@@ -28,19 +28,25 @@ Asteroids.thecanvas = function(game, theGame) {
 Asteroids.player = function(game) {
 
     var pos = [GAME_WIDTH/2,GAME_HEIGHT/2];
-    var direction = -Math.PI/2;
+    var direction = Math.PI/2;
+    var r = 6;
     
     return {
         draw: function(context) {
-            context.translate(pos[0], pos[1]);
-            context.rotate(direction);
             context.beginPath();
-
-            context.moveTo(10,0);
-            context.lineTo(-5,5);
-            context.lineTo(-5,-5);
-            context.lineTo(10,0);
-
+            context.moveTo(
+                pos[0] + r * Math.cos(direction),
+                pos[1] - r * Math.sin(direction)
+            );
+            context.lineTo(
+                pos[0] - r * (Math.cos(direction) + Math.sin(direction)),
+                pos[1] + r * (Math.sin(direction) - Math.cos(direction))
+            );
+            context.lineTo(
+                pos[0] - r * (Math.cos(direction) - Math.sin(direction)),
+                pos[1] + r * (Math.sin(direction) + Math.cos(direction))
+            );
+            context.closePath();
             context.stroke();
         }
     }
