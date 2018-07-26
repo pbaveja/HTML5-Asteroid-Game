@@ -1,6 +1,8 @@
 var Asteroids = function(theGame) {
     this.thecanvas = Asteroids.thecanvas(this, theGame);
     this.player = Asteroids.player(this);
+    this.keyState = Asteroids.keyState(this);
+    this.listen = Asteroids.listen(this);
 
     Asteroids.play(this);
     return this;
@@ -58,6 +60,62 @@ Asteroids.player = function(game) {
     }
 }
 
+Asteroids.keyState = function(game) {
+    var kstate = [];
+    kstate[LEFT_CODE] = false;
+    kstate[RIGHT_CODE] = false;
+    kstate[UP_CODE] = false;
+    kstate[SPACE_CODE] = false;
+
+    return {
+        on: function(key) {
+            kstate[key] = true;
+        },
+        off: function(key) {
+            kstate[key] = false;
+        },
+        getState: function(key) {
+            if (typeof kstate[key] != 'undefined')
+                return kstate[key];
+            return false;
+        }
+    }
+}
+
+Asteroids.listen = function(game) {
+    window.addEventListener('keydown', function(event) {
+        switch (event.which) {
+            case LEFT_CODE:
+            case RIGHT_CODE:
+            case UP_CODE:
+            case SPACE_CODE:
+                event.preventDefault();
+                event.stopPropagation();
+                game.keyState.on(event.which)
+                return false;
+        }
+        return true;
+    }, true);
+
+    window.addEventListener('keyup', function(event) {
+        switch (event.which) {
+            case LEFT_CODE:
+            case RIGHT_CODE:
+            case UP_CODE:
+            case SPACE_CODE:
+                event.preventDefault();
+                event.stopPropagation();
+                game.keyState.off(event.which)
+                return false;
+        }
+        return true;
+    }, true);
+}
+
+LEFT_CODE = 37;
+RIGHT_CODE = 39;
+UP_CODE = 38;
+SPACE_CODE = 32;
 GAME_WIDTH = 600;
 GAME_HEIGHT = 480;
 FPS = 30; 
