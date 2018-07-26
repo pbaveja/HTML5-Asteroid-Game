@@ -17,7 +17,13 @@ Asteroids.play = function(game){
         // context.save();
         context.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
         game.player.draw(context);
-        game.player.rotate(ROTATE_SPEED);
+
+        if (game.keyState.getState(LEFT_CODE)) {
+            game.player.rotate(ROTATE_SPEED);
+        }
+        else if (game.keyState.getState(RIGHT_CODE)) {
+            game.player.rotate(-ROTATE_SPEED);
+        }
     }
 
 }
@@ -119,6 +125,6 @@ SPACE_CODE = 32;
 GAME_WIDTH = 600;
 GAME_HEIGHT = 480;
 FPS = 30; 
-ROTATE_SPEED = Math.PI/10;
+ROTATE_SPEED = Math.PI/30;
 
 window.onload = Asteroids(document.getElementById('theGame'));
