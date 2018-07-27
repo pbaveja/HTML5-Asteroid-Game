@@ -5,7 +5,7 @@ var Asteroids = function(theGame) {
     this.listen = Asteroids.listen(this);
 
     Asteroids.play(this);
-    return this;
+    //return this;
 }
 
 Asteroids.play = function(game){
@@ -17,12 +17,16 @@ Asteroids.play = function(game){
         // context.save();
         context.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
         game.player.draw(context);
+        game.player.move();
 
         if (game.keyState.getState(LEFT_CODE)) {
             game.player.rotate(ROTATE_SPEED);
         }
-        else if (game.keyState.getState(RIGHT_CODE)) {
+        if (game.keyState.getState(RIGHT_CODE)) {
             game.player.rotate(-ROTATE_SPEED);
+        }
+        if (game.keyState.getState(UP_CODE)) {
+            game.player.thrust(THRUST_ACC);
         }
     }
 
@@ -41,6 +45,7 @@ Asteroids.player = function(game) {
     var pos = [GAME_WIDTH/2,GAME_HEIGHT/2];
     var direction = Math.PI/2;
     var r = 15;
+    var vel = [0,0];
     
     return {
         draw: function(context) {
@@ -62,6 +67,14 @@ Asteroids.player = function(game) {
         },
         rotate: function(rspeed) {
             direction += rspeed;
+        },
+        thrust: function(thrust) {
+            vel[0] += thrust*Math.cos(direction);
+            vel[1] -= thrust*Math.sin(direction);     
+        },
+        move: function() {
+            pos[0] += vel[0];
+            pos[1] += vel[1];
         }
     }
 }
@@ -126,5 +139,6 @@ GAME_WIDTH = 600;
 GAME_HEIGHT = 480;
 FPS = 30; 
 ROTATE_SPEED = Math.PI/30;
+THRUST_ACC = 1;
 
 window.onload = Asteroids(document.getElementById('theGame'));
