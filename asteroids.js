@@ -26,7 +26,12 @@ Asteroids.play = function(game){
             game.player.rotate(-ROTATE_SPEED);
         }
         if (game.keyState.getState(UP_CODE)) {
+            game.player.thrusting = true;
             game.player.thrust(THRUST_ACC);
+        }
+        else if (!game.keyState.getState(UP_CODE)) {
+            game.player.thrusting = false;
+            game.player.thrust(FRICTION_VALUE);
         }
     }
 
@@ -44,24 +49,24 @@ Asteroids.player = function(game) {
 
     var pos = [GAME_WIDTH/2,GAME_HEIGHT/2];
     var direction = Math.PI/2;
-    var r = 15;
+    var r = 12;
     var vel = [0,0];
-    
+    var thrusting = false;
     return {
         draw: function(context) {
             context.beginPath();
             context.moveTo(
                 pos[0] + r * Math.cos(direction),
                 pos[1] - r * Math.sin(direction)
-            );
+                );
             context.lineTo(
                 pos[0] - r/3 * (Math.cos(direction) + Math.sin(direction)),
                 pos[1] + r/3 * (Math.sin(direction) - Math.cos(direction))
-            );
+                );
             context.lineTo(
                 pos[0] - r/3 * (Math.cos(direction) - Math.sin(direction)),
                 pos[1] + r/3 * (Math.sin(direction) + Math.cos(direction))
-            );
+                );
             context.closePath();
             context.stroke();
         },
@@ -69,14 +74,29 @@ Asteroids.player = function(game) {
             direction += rspeed;
         },
         thrust: function(thrust) {
-            vel[0] += thrust*Math.cos(direction);
-            vel[1] -= thrust*Math.sin(direction);     
-        },
-        move: function() {
-            pos[0] += vel[0];
-            pos[1] += vel[1];
+            if (game.player.thrusting) {
+                vel[0] += thrust*Math.cos(direction);
+                vel[1] -= thrust*Math.sin(direction);     
+          }
+          else {
+            vel[0] -= thrust*vel[0];
+            vel[1] -= thrust*vel[1];   
         }
+    },
+    move: function() {
+        pos[0] += vel[0];
+        if (pos[0] < 0)
+            pos[0] = GAME_WIDTH + pos[0];
+        else if (pos[0] > GAME_WIDTH)
+            pos[0] -= GAME_WIDTH;
+
+        pos[1] += vel[1];
+        if (pos[1] < 0)
+            pos[1] = GAME_HEIGHT + pos[1];
+        else if (pos[1] > GAME_HEIGHT)
+            pos[1] -= GAME_HEIGHT;
     }
+}
 }
 
 Asteroids.keyState = function(game) {
@@ -108,10 +128,10 @@ Asteroids.listen = function(game) {
             case RIGHT_CODE:
             case UP_CODE:
             case SPACE_CODE:
-                event.preventDefault();
-                event.stopPropagation();
-                game.keyState.on(event.which)
-                return false;
+            event.preventDefault();
+            event.stopPropagation();
+            game.keyState.on(event.which)
+            return false;
         }
         return true;
     }, true);
@@ -122,10 +142,10 @@ Asteroids.listen = function(game) {
             case RIGHT_CODE:
             case UP_CODE:
             case SPACE_CODE:
-                event.preventDefault();
-                event.stopPropagation();
-                game.keyState.off(event.which)
-                return false;
+            event.preventDefault();
+            event.stopPropagation();
+            game.keyState.off(event.which)
+            return false;
         }
         return true;
     }, true);
@@ -139,6 +159,7 @@ GAME_WIDTH = 600;
 GAME_HEIGHT = 480;
 FPS = 30; 
 ROTATE_SPEED = Math.PI/30;
-THRUST_ACC = 1;
+THRUST_ACC = 0.8;
+FRICTION_VALUE = 0.05;
 
 window.onload = Asteroids(document.getElementById('theGame'));
