@@ -16,15 +16,7 @@ Asteroids.play = function(game){
     function update() {
         // context.save();
         context.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-        game.player.draw(context);
-        game.player.move();
 
-        if (game.keyState.getState(LEFT_CODE)) {
-            game.player.rotate(ROTATE_SPEED);
-        }
-        if (game.keyState.getState(RIGHT_CODE)) {
-            game.player.rotate(-ROTATE_SPEED);
-        }
         if (game.keyState.getState(UP_CODE)) {
             game.player.thrusting = true;
             game.player.thrust(THRUST_ACC, context);
@@ -33,6 +25,17 @@ Asteroids.play = function(game){
             game.player.thrusting = false;
             game.player.thrust(FRICTION_VALUE, context);
         }
+
+        game.player.draw(context);
+
+        if (game.keyState.getState(LEFT_CODE)) {
+            game.player.rotate(ROTATE_SPEED);
+        }
+        if (game.keyState.getState(RIGHT_CODE)) {
+            game.player.rotate(-ROTATE_SPEED);
+        }
+
+        game.player.move();
     }
 }
 
