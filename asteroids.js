@@ -76,7 +76,11 @@ Asteroids.player = function(game) {
         thrust: function(thrust) {
             if (game.player.thrusting) {
                 vel[0] += thrust*Math.cos(direction);
-                vel[1] -= thrust*Math.sin(direction);     
+                vel[1] -= thrust*Math.sin(direction);
+                if (Math.sqrt(vel[0] * vel[0] + vel[1] * vel[1]) > MAX_SPEED) {
+                  vel[0] *= 0.95; 
+                  vel[1] *= 0.95;
+              }     
           }
           else {
             vel[0] -= thrust*vel[0];
@@ -161,5 +165,6 @@ FPS = 30;
 ROTATE_SPEED = Math.PI/30;
 THRUST_ACC = 0.8;
 FRICTION_VALUE = 0.05;
+MAX_SPEED = 10;
 
 window.onload = Asteroids(document.getElementById('theGame'));
