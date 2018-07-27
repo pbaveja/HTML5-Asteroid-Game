@@ -98,6 +98,8 @@ Asteroids.player = function(game) {
                     pos[1] + r/6 * (Math.sin(direction) + Math.cos(direction))
                     );
                 context.closePath();
+                context.fillStyle = "red";
+                context.fill();
                 context.stroke();
             }
             else {
