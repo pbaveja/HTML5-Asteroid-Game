@@ -34,7 +34,6 @@ Asteroids.play = function(game){
         if (game.keyState.getState(RIGHT_CODE)) {
             game.player.rotate(-ROTATE_SPEED);
         }
-
         game.player.move();
     }
 }
@@ -86,20 +85,20 @@ Asteroids.player = function(game) {
                 //thruster draw
                 context.beginPath();
                 context.moveTo(
-                    pos[0] - r/6 * (Math.cos(direction) + Math.sin(direction)),
-                    pos[1] + r/6 * (Math.sin(direction) - Math.cos(direction))
+                    pos[0] - r * 2/3*Math.cos(direction),
+                    pos[1] + r * 2/3*Math.sin(direction)
                     );
                 context.lineTo(
-                    pos[0] - r * Math.cos(direction),
-                    pos[1] + r * Math.sin(direction)
+                    pos[0] - r/3 * (1.2*Math.cos(direction) + 1/2*Math.sin(direction)),
+                    pos[1] + r/3 * (1.2*Math.sin(direction) - 1/2*Math.cos(direction))
                     );
                 context.lineTo(
-                    pos[0] - r/6 * (Math.cos(direction) - Math.sin(direction)),
-                    pos[1] + r/6 * (Math.sin(direction) + Math.cos(direction))
+                    pos[0] - r/3 * (1.2*Math.cos(direction) - 1/2*Math.sin(direction)),
+                    pos[1] + r/3 * (1.2*Math.sin(direction) + 1/2*Math.cos(direction))
                     );
                 context.closePath();
-                context.fillStyle = "red";
-                context.fill();
+                // context.fillStyle = "red";
+                // context.fill();
                 context.stroke();
             }
             else {
@@ -181,10 +180,10 @@ UP_CODE = 38;
 SPACE_CODE = 32;
 GAME_WIDTH = 600;
 GAME_HEIGHT = 480;
-FPS = 30; 
-ROTATE_SPEED = Math.PI/30;
-THRUST_ACC = 0.8;
-FRICTION_VALUE = 0;
-MAX_SPEED = 5;
+FPS = 60; 
+ROTATE_SPEED = Math.PI/60;
+THRUST_ACC = 0.3;
+FRICTION_VALUE = 0.03;
+MAX_SPEED = 2;
 
 window.onload = Asteroids(document.getElementById('theGame'));
