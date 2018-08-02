@@ -3,7 +3,7 @@ var Asteroids = function(theGame) {
     this.player = Asteroids.player(this);
     this.keyState = Asteroids.keyState(this);
     this.listen = Asteroids.listen(this);
-
+    this.asteroid = Asteroids.asteroid(this);
     Asteroids.play(this);
     //return this;
 }
@@ -122,6 +122,30 @@ Asteroids.player = function(game) {
     }
 }
 
+Asteroids.asteroid = function(game) {
+    var pos = [0, 0];
+    var vel = [0, 0];
+    var r = 30;
+
+    return {
+        getPosition: function() {
+            return pos;
+        },
+        setPosition: function(npos) {
+            pos = npos;
+        },
+        getVelocity: function() {
+            return vel;
+        },
+        setVelocity: function(nvel) {
+            vel = nvel;
+        },
+        getRadius: function() {
+            return r;
+        }
+    }
+}
+
 Asteroids.keyState = function(game) {
     var kstate = [];
     kstate[LEFT_CODE] = false;
@@ -185,5 +209,7 @@ ROTATE_SPEED = Math.PI/60;
 THRUST_ACC = 0.3;
 FRICTION_VALUE = 0.03;
 MAX_SPEED = 2;
+
+var asteroids = [];
 
 window.onload = Asteroids(document.getElementById('theGame'));
