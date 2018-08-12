@@ -10,13 +10,22 @@ var Asteroids = function(theGame) {
 
 Asteroids.play = function(game) {
     var context = game.thecanvas.getContext('2d');
+    
+    //create new default asteroids
+    var roids = game.roidBelt.getBelt();
+    for (var j = 0; j < NUM_OF_ROIDS; j++) {
+        var x = Math.floor(Math.random() * GAME_WIDTH);
+        var y = Math.floor(Math.random() * GAME_HEIGHT);
+        var myroid = Asteroids.asteroid(game, x, y);
+        roids.push(myroid);
+    }
 
     //using RAF with a fallback to setInterval
     requestAnimationFrame = window.requestAnimationFrame ||
-                        window.mozRequestAnimationFrame ||
-                        window.webkitRequestAnimationFrame ||
-                        window.msRequestAnimationFrame ||
-                        setInterval;
+    window.mozRequestAnimationFrame ||
+    window.webkitRequestAnimationFrame ||
+    window.msRequestAnimationFrame ||
+    setInterval;
 
     //setInterval(update, 1000/FPS);
     requestAnimationFrame(update, 1000/FPS);
@@ -49,20 +58,12 @@ Asteroids.play = function(game) {
         game.player.move();     //move the ship by updating position(add velocity vector to position vector)
 
         //*******ASTEROIDS CREATION AND MOVEMENT*******
-        var roids = game.roidBelt.getBelt();
+        roids = game.roidBelt.getBelt();
         for (var i = 0; i < game.roidBelt.getLength(); i++) {
             //draw each asteroid
             roids[i].draw(context);
             //move each asteroid
             roids[i].move();
-
-        }
-
-        //create new default asteroids
-        for (var j = 0; j < NUM_OF_ROIDS; j++) {
-            var myroid = Asteroids.asteroid(game);
-            //set myroid properties
-            roids.push(myroid);
         }
         requestAnimationFrame(update, 1000/FPS);
     }
@@ -147,14 +148,25 @@ Asteroids.player = function(game) {
                 pos[1] = GAME_HEIGHT + pos[1];
             else if (pos[1] > GAME_HEIGHT)
                 pos[1] -= GAME_HEIGHT;
+        },
+        getRadius: function() {
+            return r;
+        },
+        getPosition: function() {
+            return pos;
         }
     }
 }
 
-Asteroids.asteroid = function(game) {
-    var pos = [40, 40];
-    var vel = [0, 0];
-    var r = 30;
+Asteroids.asteroid = function(game, x, y) {
+    var pos = [x,y];
+    var vel = [
+    Math.random()*ROID_SPEED/FPS*(Math.random() < 0.5 ? 1 : -1), 
+    Math.random()*ROID_SPEED/FPS*(Math.random() < 0.5 ? 1 : -1)
+    ];
+    var r = ROID_SIZE;
+    var vertex = 7;
+    var direction = Math.random() * 2*Math.PI
 
     return {
         getPosition: function() {
@@ -173,10 +185,27 @@ Asteroids.asteroid = function(game) {
             return r;
         },
         draw: function(context) {
-            
+            //get to first asteroid point
+            context.beginPath();
+            context.moveTo(
+                pos[0] + r * Math.cos(direction),
+                pos[1] + r * Math.sin(direction)
+                );
+            //draw polygon
+            for (var k = 1; k < vertex; k++) {
+                context.lineTo(
+                    pos[0] + r * Math.cos(direction + k * 2*Math.PI/vertex),
+                    pos[1] + r * Math.sin(direction + k * 2*Math.PI/vertex)
+                    );
+            }
+            context.closePath();
+            context.stroke();
+
         },
         move: function() {
+            //add vel to pos
 
+            //handle edge of screen
         }
     }
 }
@@ -252,6 +281,10 @@ Asteroids.listen = function(game) {
     }, true);
 }
 
+function distBetweenPoints(x1, y1, x2, y2) {
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+}
+
 LEFT_CODE = 37;
 RIGHT_CODE = 39;
 UP_CODE = 38;
@@ -263,6 +296,8 @@ ROTATE_SPEED = Math.PI;
 THRUST_ACC = 0.3;
 FRICTION_VALUE = 0.03;
 MAX_SPEED = 2;
-NUM_OF_ROIDS = 10;
+NUM_OF_ROIDS = 5;
+ROID_SPEED = 10;
+ROID_SIZE = 50;
 
 window.onload = Asteroids(document.getElementById('theGame'));
