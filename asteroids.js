@@ -11,7 +11,15 @@ var Asteroids = function(theGame) {
 Asteroids.play = function(game) {
     var context = game.thecanvas.getContext('2d');
 
-    setInterval(update, 1000/FPS);
+    //using RAF with a fallback to setInterval
+    requestAnimationFrame = window.requestAnimationFrame ||
+                        window.mozRequestAnimationFrame ||
+                        window.webkitRequestAnimationFrame ||
+                        window.msRequestAnimationFrame ||
+                        setInterval;
+
+    //setInterval(update, 1000/FPS);
+    requestAnimationFrame(update, 1000/FPS);
 
     function update() {
         // context.save(); 
@@ -56,6 +64,7 @@ Asteroids.play = function(game) {
             //set myroid properties
             roids.push(myroid);
         }
+        requestAnimationFrame(update, 1000/FPS);
     }
 }
 
@@ -98,7 +107,7 @@ Asteroids.player = function(game) {
             if (game.player.thrusting) {
                 vel[0] += thrust*Math.cos(direction);
                 vel[1] -= thrust*Math.sin(direction);
-                if (Math.sqrt(vel[0] * vel[0] + vel[1] * vel[1]) > MAX_SPEED) {
+                if (Math.sqrt(vel[0] * vel[0] + vel[1] * vel[1]) >= MAX_SPEED) {
                     vel[0] *= 0.95;
                     vel[1] *= 0.95;
                 }
@@ -143,7 +152,7 @@ Asteroids.player = function(game) {
 }
 
 Asteroids.asteroid = function(game) {
-    var pos = [0, 0];
+    var pos = [40, 40];
     var vel = [0, 0];
     var r = 30;
 
@@ -163,7 +172,7 @@ Asteroids.asteroid = function(game) {
         getRadius: function() {
             return r;
         },
-        draw: function() {
+        draw: function(context) {
             
         },
         move: function() {
