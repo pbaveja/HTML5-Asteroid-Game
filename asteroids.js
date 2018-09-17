@@ -13,11 +13,20 @@ Asteroids.play = function(game) {
     
     //create new default asteroids
     var roids = game.roidBelt.getBelt();
+    var x, y;
     for (var j = 0; j < NUM_OF_ROIDS; j++) {
-        var x = Math.floor(Math.random() * GAME_WIDTH);
-        var y = Math.floor(Math.random() * GAME_HEIGHT);
-        var myroid = Asteroids.asteroid(game, x, y);
-        roids.push(myroid);
+        var playerpos = game.player.getPosition();      // playerpos[300,240]
+        var test = ROID_SIZE + game.player.getRadius(); // 64
+        var distbwpoints = Math.sqrt(Math.pow(playerpos[0]-x, 2) + Math.pow(playerpos[1]-y, 2));
+        if (isNaN(distbwpoints)) distbwpoints = 0;
+        console.log(distbwpoints + " AND " + test);
+//        if(distbwpoints != 0 || distbwpoints > test) {
+            x = Math.floor(Math.random() * GAME_WIDTH);
+            y = Math.floor(Math.random() * GAME_HEIGHT);
+
+            var myroid = Asteroids.asteroid(game, x, y);
+            roids.push(myroid);
+//      }
     }
 
     //using RAF with a fallback to setInterval
