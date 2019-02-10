@@ -15,11 +15,8 @@ Asteroids.play = function(game) {
     var roids = game.roidBelt.getBelt();
     var x, y;
     for (var j = 0; j < NUM_OF_ROIDS; j++) {
-        var playerpos = game.player.getPosition();      // playerpos[300,240]
+        var playerpos = game.player.getPosition(); // playerpos[300,240]
         var myBuffer = ROID_SIZE * 2 + game.player.getRadius(); // 114
-        // var distbwpoints = Math.sqrt(Math.pow(playerpos[0]-x, 2) + Math.pow(playerpos[1]-y, 2));
-        // if (isNaN(distbwpoints)) distbwpoints = 0;
-        // console.log(distbwpoints + " AND " + myBuffer);
         x = Math.floor(Math.random() * GAME_WIDTH);
         y = Math.floor(Math.random() * GAME_HEIGHT);
         // console.log(distBetweenPoints(playerpos[0],playerpos[1], x, y) + " : " + myBuffer);
@@ -45,27 +42,29 @@ Asteroids.play = function(game) {
         context.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
         //******PLAYER SHIP********
-        //thrusting movement
-        if (game.keyState.getState(UP_CODE)) {
-            game.player.thrusting = true;
-            game.player.thrust(THRUST_ACC, context);
-        }
-        else if (!game.keyState.getState(UP_CODE)) {
-            game.player.thrusting = false;
-            game.player.thrust(FRICTION_VALUE, context);
-        }
+        if (!game.player.isDead()) {
+            //thrusting movement
+            if (game.keyState.getState(UP_CODE)) {
+                game.player.thrusting = true;
+                game.player.thrust(THRUST_ACC, context);
+            }
+            else if (!game.keyState.getState(UP_CODE)) {
+                game.player.thrusting = false;
+                game.player.thrust(FRICTION_VALUE, context);
+            }
 
-        //draw the player ship
-        game.player.draw(context);
+            //draw the player ship
+            game.player.draw(context);
 
-        //directional movement for the ship
-        if (game.keyState.getState(LEFT_CODE)) {
-            game.player.rotate(ROTATE_SPEED/FPS);
+            //directional movement for the ship
+            if (game.keyState.getState(LEFT_CODE)) {
+                game.player.rotate(ROTATE_SPEED/FPS);
+            }
+            if (game.keyState.getState(RIGHT_CODE)) {
+                game.player.rotate(-ROTATE_SPEED/FPS);
+            }
+            game.player.move();     //move the ship by updating position(add velocity vector to position vector)
         }
-        if (game.keyState.getState(RIGHT_CODE)) {
-            game.player.rotate(-ROTATE_SPEED/FPS);
-        }
-        game.player.move();     //move the ship by updating position(add velocity vector to position vector)
 
         //*******ASTEROIDS CREATION AND MOVEMENT*******
         roids = game.roidBelt.getBelt();
@@ -74,6 +73,10 @@ Asteroids.play = function(game) {
             roids[i].draw(context);
             //move each asteroid
             roids[i].move();
+
+            if(Asteroids.collision(game.player, roids[i]) && !game.player.isDead() && !game.player.isInvincible()) {
+                game.player.die();
+            }
         }
         requestAnimationFrame(update, 1000/FPS);
     }
@@ -93,6 +96,9 @@ Asteroids.player = function(game) {
     var r = 14;
     var vel = [0,0];
     var thrusting = false;
+    var dead = false;
+    var invincible = false;
+    var lives = PLAYER_LIVES;
     return {
         draw: function(context) {
             context.beginPath();
@@ -164,6 +170,42 @@ Asteroids.player = function(game) {
         },
         getPosition: function() {
             return pos;
+        },
+
+        die: function() {
+            if (!dead) {
+                dead = true;
+                invincible = true;
+                pos = [GAME_WIDTH/2,GAME_HEIGHT/2];
+                direction = Math.PI/2;
+                vel = [0,0];
+                thrusting = false;
+                lives--;
+                console.log("You died");
+                if (lives > 0) {
+                    setTimeout(function() {
+                        dead = false;
+                        game.player.ressurect();
+                    }, DEATH_TIMEOUT);
+                } else {
+                    console.log("Game Over");
+                }
+            }
+        },
+
+        ressurect: function() {
+            setTimeout(function() {
+                dead = false;
+                invincible = false;
+            }, INVINCIBLE_TIMEOUT);
+        },
+
+        isDead: function() {
+            return dead;
+        },
+
+        isInvincible: function() {
+            return invincible;
         }
     };
 };
@@ -256,6 +298,19 @@ Asteroids.roidBelt = function(game) {
     };
 };
 
+Asteroids.collision = function(a, b) {
+    var a_pos = a.getPosition();
+    var b_pos = b.getPosition();
+
+    var distance = distBetweenPoints(a_pos[0], a_pos[1], b_pos[0], b_pos[1]);
+
+    if (distance <= (a.getRadius() + b.getRadius())) {
+        return true;
+    } else {
+        return false;
+    }
+};
+
 Asteroids.keyState = function(game) {
     var kstate = [];
     kstate[LEFT_CODE] = false;
@@ -319,11 +374,16 @@ SPACE_CODE = 32;
 GAME_WIDTH = 600;
 GAME_HEIGHT = 480;
 FPS = 60; 
+
 ROTATE_SPEED = Math.PI;
-THRUST_ACC = 0.3;
+THRUST_ACC = 0.2;
 FRICTION_VALUE = 0.03;
 MAX_SPEED = 2;
-NUM_OF_ROIDS = 20;
+INVINCIBLE_TIMEOUT = 3000;
+DEATH_TIMEOUT = 2000;
+PLAYER_LIVES = 3;
+
+NUM_OF_ROIDS = 5;
 ROID_SPEED = 40;
 ROID_SIZE = 50;
 ROID_JAG = 0.3; //0 = no jaggedness, 1 = lots of jaggedness
