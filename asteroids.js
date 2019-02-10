@@ -6,7 +6,7 @@ var Asteroids = function(theGame) {
     this.listen = Asteroids.listen(this);
     Asteroids.play(this);
     //return this;
-}
+};
 
 Asteroids.play = function(game) {
     var context = game.thecanvas.getContext('2d');
@@ -16,17 +16,18 @@ Asteroids.play = function(game) {
     var x, y;
     for (var j = 0; j < NUM_OF_ROIDS; j++) {
         var playerpos = game.player.getPosition();      // playerpos[300,240]
-        var test = ROID_SIZE + game.player.getRadius(); // 64
-        var distbwpoints = Math.sqrt(Math.pow(playerpos[0]-x, 2) + Math.pow(playerpos[1]-y, 2));
-        if (isNaN(distbwpoints)) distbwpoints = 0;
-        console.log(distbwpoints + " AND " + test);
-//        if(distbwpoints != 0 || distbwpoints > test) {
-            x = Math.floor(Math.random() * GAME_WIDTH);
-            y = Math.floor(Math.random() * GAME_HEIGHT);
-
+        var myBuffer = ROID_SIZE * 2 + game.player.getRadius(); // 114
+        // var distbwpoints = Math.sqrt(Math.pow(playerpos[0]-x, 2) + Math.pow(playerpos[1]-y, 2));
+        // if (isNaN(distbwpoints)) distbwpoints = 0;
+        // console.log(distbwpoints + " AND " + myBuffer);
+        x = Math.floor(Math.random() * GAME_WIDTH);
+        y = Math.floor(Math.random() * GAME_HEIGHT);
+        // console.log(distBetweenPoints(playerpos[0],playerpos[1], x, y) + " : " + myBuffer);
+        if (distBetweenPoints(playerpos[0],playerpos[1], x, y) > myBuffer) {
+            // console.log("PUSH ASTEROID INTO BELT");
             var myroid = Asteroids.asteroid(game, x, y);
             roids.push(myroid);
-//      }
+        }
     }
 
     //using RAF with a fallback to setInterval
@@ -76,7 +77,7 @@ Asteroids.play = function(game) {
         }
         requestAnimationFrame(update, 1000/FPS);
     }
-}
+};
 
 Asteroids.thecanvas = function(game, theGame) {
     var canvas = document.getElementById('canvas');
@@ -84,7 +85,7 @@ Asteroids.thecanvas = function(game, theGame) {
     canvas.height = GAME_HEIGHT;
     //theGame.appendChild(canvas);
     return canvas;
-}
+};
 
 Asteroids.player = function(game) {
     var pos = [GAME_WIDTH/2,GAME_HEIGHT/2];
@@ -164,8 +165,8 @@ Asteroids.player = function(game) {
         getPosition: function() {
             return pos;
         }
-    }
-}
+    };
+};
 
 Asteroids.asteroid = function(game, x, y) {
     var pos = [x,y];
@@ -174,8 +175,12 @@ Asteroids.asteroid = function(game, x, y) {
     Math.random()*ROID_SPEED/FPS*(Math.random() < 0.5 ? 1 : -1)
     ];
     var r = ROID_SIZE;
-    var vertex = 7;
-    var direction = Math.random() * 2*Math.PI
+    var vertex = Math.random() * 12 + 5;
+    var direction = Math.random() * 2*Math.PI;
+    var offs = [];
+    for (var i = 0; i < vertex; i++) {
+        offs.push(Math.random() * ROID_JAG * 2 + 1 - ROID_JAG);
+    }
 
     return {
         getPosition: function() {
@@ -197,14 +202,14 @@ Asteroids.asteroid = function(game, x, y) {
             //get to first asteroid point
             context.beginPath();
             context.moveTo(
-                pos[0] + r * Math.cos(direction),
-                pos[1] + r * Math.sin(direction)
+                pos[0] + r*offs[0] * Math.cos(direction),
+                pos[1] + r*offs[0] * Math.sin(direction)
                 );
             //draw polygon
             for (var k = 1; k < vertex; k++) {
                 context.lineTo(
-                    pos[0] + r * Math.cos(direction + k * 2*Math.PI/vertex),
-                    pos[1] + r * Math.sin(direction + k * 2*Math.PI/vertex)
+                    pos[0] + r*offs[k] * Math.cos(direction + k * 2*Math.PI/vertex),
+                    pos[1] + r*offs[k] * Math.sin(direction + k * 2*Math.PI/vertex)
                     );
             }
             context.closePath();
@@ -212,12 +217,25 @@ Asteroids.asteroid = function(game, x, y) {
 
         },
         move: function() {
-            //add vel to pos
-
+            //move: add vel to pos
+            pos[0] += vel[0];
+            pos[1] += vel[1];
+            
             //handle edge of screen
+            if (pos[0] < 0-r) {
+                pos[0] = canvas.width + r;
+            } else if (pos[0] > canvas.width + r) {
+                pos[0] = 0-r;
+            }
+
+            if (pos[1] < 0-r) {
+                pos[1] = canvas.height + r;
+            } else if (pos[1] > canvas.height + r) {
+                pos[1] = 1-r;
+            }
         }
-    }
-}
+    };
+};
 
 Asteroids.roidBelt = function(game) {
     var roids = [];
@@ -235,8 +253,8 @@ Asteroids.roidBelt = function(game) {
         getLength: function() {
             return roids.length;
         }
-    }
-}
+    };
+};
 
 Asteroids.keyState = function(game) {
     var kstate = [];
@@ -257,8 +275,8 @@ Asteroids.keyState = function(game) {
                 return kstate[key];
             return false;
         }
-    }
-}
+    };
+};
 
 Asteroids.listen = function(game) {
     window.addEventListener('keydown', function(event) {
@@ -269,7 +287,7 @@ Asteroids.listen = function(game) {
             case SPACE_CODE:
             event.preventDefault();
             event.stopPropagation();
-            game.keyState.on(event.which)
+            game.keyState.on(event.which);
             return false;
         }
         return true;
@@ -283,15 +301,15 @@ Asteroids.listen = function(game) {
             case SPACE_CODE:
             event.preventDefault();
             event.stopPropagation();
-            game.keyState.off(event.which)
+            game.keyState.off(event.which);
             return false;
         }
         return true;
     }, true);
-}
+};
 
 function distBetweenPoints(x1, y1, x2, y2) {
-    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    return Math.floor(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
 }
 
 LEFT_CODE = 37;
@@ -305,8 +323,9 @@ ROTATE_SPEED = Math.PI;
 THRUST_ACC = 0.3;
 FRICTION_VALUE = 0.03;
 MAX_SPEED = 2;
-NUM_OF_ROIDS = 5;
-ROID_SPEED = 10;
+NUM_OF_ROIDS = 20;
+ROID_SPEED = 40;
 ROID_SIZE = 50;
+ROID_JAG = 0.3; //0 = no jaggedness, 1 = lots of jaggedness
 
 window.onload = Asteroids(document.getElementById('theGame'));
