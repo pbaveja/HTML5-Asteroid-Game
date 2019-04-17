@@ -27,6 +27,8 @@ Asteroids.play = function(game) {
         }
     }
 
+    var bullets = [];
+
     //using RAF with a fallback to setInterval
     requestAnimationFrame = window.requestAnimationFrame ||
     window.mozRequestAnimationFrame ||
@@ -63,12 +65,27 @@ Asteroids.play = function(game) {
             if (game.keyState.getState(RIGHT_CODE)) {
                 game.player.rotate(-ROTATE_SPEED/FPS);
             }
+            if (game.keyState.getState(SPACE_CODE) && game.player.canShoot) {
+                bullets.push(game.player.fire());
+                game.player.canShoot = false;
+            } else if (!game.keyState.getState(SPACE_CODE)) {
+                game.player.canShoot = true;
+            }
             game.player.move();     //move the ship by updating position(add velocity vector to position vector)
+        }
+
+        //Firing bullets drawing
+        for (var i = 0; i < bullets.length; i++) {
+            bullets[i].age();
+            if (bullets[i].getAge() < BULLET_MAX_AGE) {
+                bullets[i].move();
+                bullets[i].draw(context);   
+            }
         }
 
         //*******ASTEROIDS CREATION AND MOVEMENT*******
         roids = game.roidBelt.getBelt();
-        for (var i = 0; i < game.roidBelt.getLength(); i++) {
+        for (i = 0; i < game.roidBelt.getLength(); i++) {
             //draw each asteroid
             roids[i].draw(context);
             //move each asteroid
@@ -99,6 +116,7 @@ Asteroids.player = function(game) {
     var dead = false;
     var invincible = false;
     var lives = PLAYER_LIVES;
+    var canShoot = true;
     return {
         draw: function(context) {
             context.beginPath();
@@ -200,12 +218,57 @@ Asteroids.player = function(game) {
             }, INVINCIBLE_TIMEOUT);
         },
 
+        fire: function() {
+            return Asteroids.bullet(game, pos, direction);
+        },
+
         isDead: function() {
             return dead;
         },
 
         isInvincible: function() {
             return invincible;
+        }
+    };
+};
+
+Asteroids.bullet = function(game, pos, shootDir) {
+    var position = [pos[0],pos[1]];
+    var direction = shootDir;
+    var velocity = [BULLET_SPD * Math.cos(direction),-BULLET_SPD * Math.sin(direction)];
+    var age = 0;
+    var r = 3;
+
+    return {
+        draw: function(context) {
+            context.beginPath();
+            context.moveTo(
+                position[0] + r/3 * Math.cos(direction),
+                position[1] - r/3 * Math.sin(direction)
+                );
+            context.lineTo(
+                position[0] - r/3 * (Math.cos(direction) + Math.sin(direction)),
+                position[1] + r/3 * (Math.sin(direction) - Math.cos(direction))
+                );
+            context.lineTo(
+                position[0] - r/3 * (Math.cos(direction) - Math.sin(direction)),
+                position[1] + r/3 * (Math.sin(direction) + Math.cos(direction))
+                );
+            context.closePath();
+            context.stroke();
+        },
+        move: function() {
+            position[0] += velocity[0];
+            position[1] += velocity[1];
+        },
+        getPosition() {
+            return position;
+        },
+        age: function() {
+            age++;
+        },
+        getAge: function() {
+            return age;
         }
     };
 };
@@ -217,7 +280,7 @@ Asteroids.asteroid = function(game, x, y) {
     Math.random()*ROID_SPEED/FPS*(Math.random() < 0.5 ? 1 : -1)
     ];
     var r = ROID_SIZE;
-    var vertex = Math.random() * 12 + 5;
+    var vertex = Math.random() * 12 + 6;
     var direction = Math.random() * 2*Math.PI;
     var offs = [];
     for (var i = 0; i < vertex; i++) {
@@ -367,14 +430,18 @@ function distBetweenPoints(x1, y1, x2, y2) {
     return Math.floor(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
 }
 
+//Key Codes
 LEFT_CODE = 37;
 RIGHT_CODE = 39;
 UP_CODE = 38;
 SPACE_CODE = 32;
+
+//Game Settings
 GAME_WIDTH = 600;
 GAME_HEIGHT = 480;
 FPS = 60; 
 
+//Player settings
 ROTATE_SPEED = Math.PI;
 THRUST_ACC = 0.2;
 FRICTION_VALUE = 0.03;
@@ -383,9 +450,14 @@ INVINCIBLE_TIMEOUT = 3000;
 DEATH_TIMEOUT = 2000;
 PLAYER_LIVES = 3;
 
+//Asteroid settings
 NUM_OF_ROIDS = 5;
 ROID_SPEED = 40;
 ROID_SIZE = 50;
 ROID_JAG = 0.3; //0 = no jaggedness, 1 = lots of jaggedness
+
+//Bullet settings
+BULLET_SPD = 4;
+BULLET_MAX_AGE = 90;
 
 window.onload = Asteroids(document.getElementById('theGame'));
